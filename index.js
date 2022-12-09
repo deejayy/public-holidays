@@ -1,6 +1,8 @@
 var Holidays = require('date-holidays');
 var hd = new Holidays();
 
+const year = 2023;
+
 const countryNamesEn = {
   AF: 'Afghanistan',
   AX: 'Åland Islands',
@@ -258,7 +260,7 @@ const countries = Object.keys(countryNames).filter((country) => !['BD', 'JP', 'T
 const data = countries
   .map((country) => {
     return new Holidays(country)
-      .getHolidays(2022)
+      .getHolidays(year)
       .filter((holiday) => holiday.type === 'public')
       .map((holiday) => ({
         ...holiday,
@@ -269,7 +271,7 @@ const data = countries
   })
   .reduce((acc, curr) => [...acc, ...curr], []);
 
-require('fs').writeFileSync('public-holidays-2022.json', JSON.stringify(data, null, 2));
+require('fs').writeFileSync(`public-holidays-${year}.js`, `var holidays = ${JSON.stringify(data, null, 2)};`);
 
 // get supported countries
 hd.getCountries();

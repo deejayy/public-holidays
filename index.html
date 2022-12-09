@@ -5,13 +5,20 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>World's public holiday heatmap</title>
-    <script src="public-holidays-2022.js"></script>
+    <script>
+      const year = 2023;
+      const dataLoader = document.createElement('script');
+      dataLoader.setAttribute('src', `public-holidays-${year}.js`);
+      document.querySelector('head').append(dataLoader);
+    </script>
     <style>
       body {
+        font-family: Arial;
         padding: 0;
         margin: 0;
-        --box-size: 16px;
+        --box-size: 12px;
         --gap: 4px;
+        --border: 2px;
         --color-1: hsl(80, 50%, 72%);
         --color-2: hsl(112, 50%, 61%);
         --color-3: hsl(125, 50%, 40%);
@@ -23,10 +30,12 @@
         height: 100vh;
         justify-content: center;
         align-items: center;
+        flex-direction: column;
+        gap: 32px;
       }
       #heatmap {
-        max-height: calc(7 * (var(--box-size) + var(--gap)));
-        width: calc(53 * (var(--box-size) + var(--gap)));
+        max-height: calc(7 * (var(--box-size) + var(--gap) + 2 * var(--border)));
+        width: calc(53 * (var(--box-size) + var(--gap) + 2 * var(--border)));
         display: flex;
         flex-wrap: wrap;
         flex-direction: column;
@@ -39,48 +48,113 @@
         border-radius: 2px;
         width: var(--box-size);
         height: var(--box-size);
+        color: transparent;
+        border: var(--border) solid currentColor;
       }
 
       .day {
         border-radius: 2px;
         width: var(--box-size);
         height: var(--box-size);
-        background-color: #ebedf0;
+        color: #ebedf0;
+        background-color: currentColor;
+        border: var(--border) solid currentColor;
+      }
+
+      .day:hover {
+        border-color: #aaa;
+      }
+
+      #tooltip {
+        position: absolute;
+        display: none;
+        transform: translateX(calc(-50% + var(--box-size) / 2)) translateY(calc(-100% - 8px));
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        filter: drop-shadow(0, 0, 5px, black);
+        padding: 4px 9px;
+      }
+
+      .title {
+        font-size: 30px;
+        font-weight: 100;
+        letter-spacing: 4px;
+      }
+
+      .year {
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 4px;
       }
     </style>
   </head>
   <body>
+    <div id="tooltip"></div>
     <div class="center">
+      <div class="title">Public holidays around the world</div>
       <div id="heatmap"></div>
+      <div class="year"></div>
     </div>
     <script>
       const freq = {};
-      console.log(
+
+      const showTooltip = (event, elem) => {
+        const pos = elem.getBoundingClientRect();
+        const day = elem.getAttribute('data-day');
+        document.querySelector('#tooltip').innerHTML = `${day}${
+          freq[day] ? ` - in ${freq[day] || 0} countr${freq[day] > 1 ? 'ies' : 'y'}` : ''
+        }`;
+        tooltip.style.top = `${pos.top}px`;
+        tooltip.style.left = `${pos.left}px`;
+        tooltip.style.display = 'block';
+      };
+
+      const setup = () => {
+        document.querySelector('.year').innerHTML = year;
+
         holidays.forEach((day) => {
           const date = day.date.substring(0, 10);
           freq[date] = freq[date] || 0;
           freq[date]++;
-        }),
-      );
-      const MAX_PER_DAY = Object.values(freq).reduce((acc, curr) => Math.max(acc, curr), 0);
-      const heatmap = document.querySelector('#heatmap');
-      Array.from({ length: new Date(2022, 0, 1, 12, 0, 0).getDay() - 1 }, (_, idx) => {
-        const elem = document.createElement('div');
-        elem.classList.add('empty');
-        heatmap.append(elem);
-      });
+        });
 
-      Array.from({ length: 365 }, (_, idx) => {
-        const date = new Date(2022, 0, idx + 1, 12, 0, 0);
-        const day = date.toISOString().substring(0, 10);
-        const value = freq[day];
-        const hue = 80 + (value / MAX_PER_DAY) * 50;
-        const light = 80 - (value / MAX_PER_DAY) * 60;
+        const MAX_PER_DAY = Math.log(
+          Math.pow(
+            Object.values(freq).reduce((acc, curr) => Math.max(acc, curr), 0),
+            2,
+          ),
+        );
+        const heatmap = document.querySelector('#heatmap');
+        Array.from({ length: new Date(year, 0, 1, 12, 0, 0).getDay() - 1 }, (_, idx) => {
+          const elem = document.createElement('div');
+          elem.classList.add('empty');
+          heatmap.append(elem);
+        });
 
-        const elem = document.createElement('div');
-        elem.classList.add('day');
-        elem.style.backgroundColor = `hsl(${hue}, 50%, ${light}%)`;
-        heatmap.append(elem);
+        Array.from({ length: 365 }, (_, idx) => {
+          const date = new Date(year, 0, idx + 1, 12, 0, 0);
+          const day = date.toISOString().substring(0, 10);
+          const value = Math.log(Math.pow(freq[day], 2));
+          const hue = 80 + (value / MAX_PER_DAY) * 50;
+          const light = 80 - (value / MAX_PER_DAY) * 60;
+
+          const elem = document.createElement('div');
+          elem.classList.add('day');
+          elem.setAttribute('data-day', day);
+          elem.style.color = `hsl(${hue}, 50%, ${light}%)`;
+          heatmap.append(elem);
+        });
+
+        document.querySelectorAll('.day').forEach((elem) => {
+          elem.addEventListener('mouseover', (event) => showTooltip(event, elem));
+        });
+
+        document.querySelector('#heatmap').addEventListener('mouseout', () => (tooltip.style.display = 'none'));
+      };
+
+      window.addEventListener('load', () => {
+        setup();
       });
     </script>
   </body>
