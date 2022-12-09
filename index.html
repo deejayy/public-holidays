@@ -16,6 +16,7 @@
         font-family: Arial;
         padding: 0;
         margin: 0;
+        background-color: #fff;
         --box-size: 10px;
         --gap: 6px;
         --border: 2px;
@@ -23,7 +24,7 @@
       .center {
         display: flex;
         width: 100vw;
-        height: 100vh;
+        height: calc(100vh - 100px);
         justify-content: center;
         align-items: center;
         flex-direction: column;
@@ -83,10 +84,38 @@
         font-weight: 900;
         letter-spacing: 4px;
       }
+
+      .disclaimer {
+        color: white;
+        letter-spacing: 0.2px;
+        height: 100px;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+      }
+
+      a {
+        color: #363;
+        padding-bottom: 2px;
+        text-decoration: none;
+      }
+
+      a:hover {
+        border-bottom: 1px solid currentColor;
+      }
+
       @media (prefers-color-scheme: dark) {
         body {
           background-color: #111;
           color: #ddd;
+        }
+
+        a {
+          color: #aca;
+        }
+
+        a:hover {
+          color: #bfb;
         }
 
         .day {
@@ -103,10 +132,21 @@
   </head>
   <body>
     <div id="tooltip"></div>
-    <div class="center">
-      <div class="title">Public holidays around the world</div>
-      <div id="heatmap"></div>
-      <div class="year"></div>
+    <div>
+      <div class="center">
+        <div class="title">Public holidays around the world</div>
+        <div id="heatmap"></div>
+        <div class="year"></div>
+      </div>
+      <div class="disclaimer">
+        <div>
+          (c) deejayy (year is above)
+          <a href="https://twitter.com/deejayyhu" target="_blank" rel="nofollow">let me know if something's wrong</a>
+          | data source:
+          <a href="https://www.npmjs.com/package/date-holidays" target="_blank" rel="nofollow">date-holidays</a> |
+          snapshot (static list for above year): <a href="">download JSON (almost)</a>
+        </div>
+      </div>
     </div>
     <script>
       const freq = {};
