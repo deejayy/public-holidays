@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World's public holiday heatmap</title>
+    <script src="public-holidays-2022.js"></script>
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+        --box-size: 16px;
+        --gap: 4px;
+        --color-1: hsl(80, 50%, 72%);
+        --color-2: hsl(112, 50%, 61%);
+        --color-3: hsl(125, 50%, 40%);
+        --color-4: hsl(130, 50%, 25%);
+      }
+      .center {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+      }
+      #heatmap {
+        max-height: calc(7 * (var(--box-size) + var(--gap)));
+        width: calc(53 * (var(--box-size) + var(--gap)));
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        gap: var(--gap);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .empty {
+        border-radius: 2px;
+        width: var(--box-size);
+        height: var(--box-size);
+      }
+
+      .day {
+        border-radius: 2px;
+        width: var(--box-size);
+        height: var(--box-size);
+        background-color: #ebedf0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="center">
+      <div id="heatmap"></div>
+    </div>
+    <script>
+      const freq = {};
+      console.log(
+        holidays.forEach((day) => {
+          const date = day.date.substring(0, 10);
+          freq[date] = freq[date] || 0;
+          freq[date]++;
+        }),
+      );
+      const MAX_PER_DAY = Object.values(freq).reduce((acc, curr) => Math.max(acc, curr), 0);
+      const heatmap = document.querySelector('#heatmap');
+      Array.from({ length: new Date(2022, 0, 1, 12, 0, 0).getDay() - 1 }, (_, idx) => {
+        const elem = document.createElement('div');
+        elem.classList.add('empty');
+        heatmap.append(elem);
+      });
+
+      Array.from({ length: 365 }, (_, idx) => {
+        const date = new Date(2022, 0, idx + 1, 12, 0, 0);
+        const day = date.toISOString().substring(0, 10);
+        const value = freq[day];
+        const hue = 80 + (value / MAX_PER_DAY) * 50;
+        const light = 80 - (value / MAX_PER_DAY) * 60;
+
+        const elem = document.createElement('div');
+        elem.classList.add('day');
+        elem.style.backgroundColor = `hsl(${hue}, 50%, ${light}%)`;
+        heatmap.append(elem);
+      });
+    </script>
+  </body>
+</html>
