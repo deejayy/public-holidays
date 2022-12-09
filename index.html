@@ -16,13 +16,9 @@
         font-family: Arial;
         padding: 0;
         margin: 0;
-        --box-size: 12px;
-        --gap: 4px;
+        --box-size: 10px;
+        --gap: 6px;
         --border: 2px;
-        --color-1: hsl(80, 50%, 72%);
-        --color-2: hsl(112, 50%, 61%);
-        --color-3: hsl(125, 50%, 40%);
-        --color-4: hsl(130, 50%, 25%);
       }
       .center {
         display: flex;
@@ -69,9 +65,9 @@
         position: absolute;
         display: none;
         transform: translateX(calc(-50% + var(--box-size) / 2)) translateY(calc(-100% - 8px));
+        border-radius: 4px;
         background-color: white;
         border: 1px solid #ccc;
-        border-radius: 4px;
         filter: drop-shadow(0, 0, 5px, black);
         padding: 4px 9px;
       }
@@ -86,6 +82,22 @@
         font-size: 30px;
         font-weight: 900;
         letter-spacing: 4px;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #111;
+          color: #ddd;
+        }
+
+        .day {
+          color: #222;
+        }
+
+        #tooltip {
+          background-color: #222;
+          border: 1px solid #666;
+          filter: drop-shadow(0, 0, 5px, white);
+        }
       }
     </style>
   </head>
@@ -119,7 +131,7 @@
           freq[date]++;
         });
 
-        const MAX_PER_DAY = Math.log(
+        const maxPerDay = Math.log(
           Math.pow(
             Object.values(freq).reduce((acc, curr) => Math.max(acc, curr), 0),
             2,
@@ -136,8 +148,15 @@
           const date = new Date(year, 0, idx + 1, 12, 0, 0);
           const day = date.toISOString().substring(0, 10);
           const value = Math.log(Math.pow(freq[day], 2));
-          const hue = 80 + (value / MAX_PER_DAY) * 50;
-          const light = 80 - (value / MAX_PER_DAY) * 60;
+          let hue;
+          let light;
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            hue = 130 - (value / maxPerDay) * 50;
+            light = 10 + (value / maxPerDay) * 70;
+          } else {
+            hue = 80 + (value / maxPerDay) * 50;
+            light = 80 - (value / maxPerDay) * 60;
+          }
 
           const elem = document.createElement('div');
           elem.classList.add('day');
