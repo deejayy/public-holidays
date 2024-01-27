@@ -1,7 +1,7 @@
 var Holidays = require('date-holidays');
 var hd = new Holidays();
 
-const year = 2023;
+const year = 2024;
 
 const countryNamesEn = {
   AF: 'Afghanistan',

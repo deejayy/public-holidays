@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>World's public holiday heatmap</title>
     <script>
-      const year = 2023;
+      const year = 2024;
       const dataLoader = document.createElement('script');
       dataLoader.setAttribute('src', `public-holidays-${year}.js`);
       document.querySelector('head').append(dataLoader);
@@ -39,7 +39,6 @@
         flex-direction: column;
         gap: var(--gap);
         align-items: center;
-        justify-content: center;
       }
 
       .empty {
@@ -145,7 +144,7 @@
           <a href="https://twitter.com/deejayyhu" target="_blank" rel="nofollow">let me know if something's wrong</a>
           | data source:
           <a href="https://www.npmjs.com/package/date-holidays" target="_blank" rel="nofollow">date-holidays</a> |
-          snapshot (static list for above year): <a href="/public-holidays-2023.js">download JSON (almost)</a>
+          snapshot (static list for above year): <a href="/public-holidays-2024.js">download JSON (almost)</a>
         </div>
       </div>
     </div>
@@ -185,7 +184,7 @@
           heatmap.append(elem);
         });
 
-        Array.from({ length: 365 }, (_, idx) => {
+        Array.from({ length: 365 + (year % 4 === 0 ? 1 : 0) }, (_, idx) => {
           const date = new Date(year, 0, idx + 1, 12, 0, 0);
           const day = date.toISOString().substring(0, 10);
           const value = Math.log(Math.pow(freq[day], 2));
